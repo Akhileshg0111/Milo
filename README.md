@@ -6,7 +6,7 @@
 
 Milo AI is a revolutionary AI-powered teaching assistant platform designed to transform the way educators create lessons, communicate with students, and manage their classrooms. Built with modern web technologies and powered by Firebase, Milo AI offers a comprehensive suite of tools to make teaching more efficient and engaging.
 
-https://github.com/Akhileshg0111/Milo/blob/main/s1.png?raw=true
+https://github.com/Akhileshg0111/Milo/blob/053edbe1328cddc1fd8d0166e71ef5e075e8ba62/s1.png
 
 ## ✨ Key Features
 
