@@ -1,11 +1,11 @@
 const AUTH_CONFIG = {
     FIREBASE_CONFIG: {
-        apiKey: "AIzaSyAuOpPpLvlsfLKNF_KIm8uyW3xWWNIywgo",
-        authDomain: "milo-ai-1.firebaseapp.com",
-        projectId: "milo-ai-1",
-        storageBucket: "milo-ai-1.firebasestorage.app",
-        messagingSenderId: "269383634736",
-        appId: "1:269383634736:web:1953ddca192b0ccc3942f5"
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: ""//all of ur firebase credentials
     }
 };
 
