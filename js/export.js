@@ -17,7 +17,7 @@ const EnhancedFeatures = {
     },
     
     loadGoogleTTSConfig() {
-        this.googleTTSApiKey = 'AIzaSyCNEiD-Qt3YP6-Yp5DNqt1PAyaTW7hB3_4';
+        this.googleTTSApiKey = '';//add ur api key here
     },
     
     loadVoices() {
