@@ -9,11 +9,11 @@ IMPORTANT: You MUST create actual functional and interactive outputs, not just d
 
 Main Points:
 - If it's a **graph/chart**, use Chart.js from CDN: https://cdn.jsdelivr.net/npm/chart.js
-- If it's a **flowchart, architecture diagram, system design, or data flow**, use Mermaid.js from CDN: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+- If it's a **flowchart, architecture diagram, system design, or data flow**, use GoJS from CDN: https://unpkg.com/gojs@2.3.13/release/go.js
 - Create a COMPLETE, SELF-CONTAINED HTML page with:
    - Full HTML structure (<!DOCTYPE html>, <html>, <head>, <body>)
    - All CSS in <style> tags
-   - All JS in <script> tags (not type="module" for Mermaid)
+   - All JS in <script> tags
    - Real example data
    - Interactive and responsive design
    - Clean educational visuals
@@ -70,7 +70,7 @@ For Chart.js graphs, use this exact structure with FIXED SIZING:
     <script>
         const ctx = document.getElementById('myChart').getContext('2d');
         const myChart = new Chart(ctx, {
-            type: 'bar', // or 'pie', 'line', etc.
+            type: 'bar',
             data: {
                 labels: ['Label1', 'Label2', 'Label3'],
                 datasets: [{
@@ -104,34 +104,118 @@ For Chart.js graphs, use this exact structure with FIXED SIZING:
 </html>
 \`\`\`
 
-For Mermaid diagrams, use this exact structure:
+For GoJS diagrams, use this exact structure:
 \`\`\`html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Architecture Diagram</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <title>Interactive Diagram</title>
+    <script src="https://unpkg.com/gojs@2.3.13/release/go.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .mermaid { text-align: center; margin: 20px auto; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        #diagram-container {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px auto;
+        }
+        h1 { text-align: center; color: #333; }
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <h1>Title</h1>
-    <div class="mermaid">
-        graph TD
-            A[Start] --> B[Process]
-            B --> C[End]
+    <h1>Interactive Diagram</h1>
+    <div class="controls">
+        <button onclick="exportDiagram()">Export Image</button>
+        <button onclick="window.print()">Print</button>
+        <button onclick="resetDiagram()">Reset View</button>
     </div>
+    <div id="diagram-container"></div>
+    
     <script>
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'default',
-            flowchart: {
-                htmlLabels: true,
-                curve: 'basis'
-            }
+        const $ = go.GraphObject.make;
+        
+        const diagram = $(go.Diagram, "diagram-container", {
+            "undoManager.isEnabled": true,
+            layout: $(go.TreeLayout, { angle: 90, layerSpacing: 50 }),
+            "grid.visible": true,
+            allowDrop: true,
+            allowTextEdit: true
         });
+
+        diagram.nodeTemplate = $(go.Node, "Auto",
+            $(go.Shape, "RoundedRectangle", 
+                { strokeWidth: 2, fill: "#e1f5fe" },
+                new go.Binding("fill", "color")
+            ),
+            $(go.TextBlock, 
+                { margin: 12, stroke: "#333", font: "14px Arial" },
+                new go.Binding("text", "key")
+            )
+        );
+
+        diagram.linkTemplate = $(go.Link,
+            { routing: go.Link.Orthogonal, corner: 5 },
+            $(go.Shape, { strokeWidth: 2, stroke: "#333" }),
+            $(go.Shape, { toArrow: "Standard", stroke: "#333", fill: "#333" })
+        );
+
+        const nodeDataArray = [
+            { key: "Start", color: "#81c784" },
+            { key: "Process 1", color: "#ffb74d" },
+            { key: "Decision", color: "#f06292" },
+            { key: "Process 2", color: "#ffb74d" },
+            { key: "End", color: "#e57373" }
+        ];
+
+        const linkDataArray = [
+            { from: "Start", to: "Process 1" },
+            { from: "Process 1", to: "Decision" },
+            { from: "Decision", to: "Process 2" },
+            { from: "Process 2", to: "End" }
+        ];
+
+        diagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+
+        function exportDiagram() {
+            const img = diagram.makeImageData({
+                background: "white",
+                returnType: "blob",
+                callback: function(blob) {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "diagram.png";
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
+        }
+
+        function resetDiagram() {
+            diagram.commandHandler.zoomToFit();
+        }
     </script>
 </body>
 </html>
@@ -157,25 +241,22 @@ Please provide the HTML code in a code block as shown above, along with a brief 
                response.includes('[INTERACTIVE_GRAPH_READY]') || 
                response.includes('[INTERACTIVE_FLOWCHART_READY]') || 
                (response.includes('<!DOCTYPE html>') && 
-                (response.includes('Chart.js') || response.includes('mermaid') ||
+                (response.includes('Chart.js') || response.includes('gojs') ||
                  response.includes('new Chart') || response.includes('<canvas') ||
-                 response.includes('class="mermaid"')));
+                 response.includes('go.GraphObject') || response.includes('diagram-container')));
     },
 
     extractGraphHTML(response) {
         let htmlContent = '';
         
-        // First try to extract from markdown code block
         const htmlBlockMatch = response.match(/```html\s*([\s\S]*?)\s*```/);
         if (htmlBlockMatch) {
             htmlContent = htmlBlockMatch[1];
         } else {
-            // Try to find HTML without code block markers
             const htmlMatch = response.match(/(<!DOCTYPE html>[\s\S]*?<\/html>)/);
             if (htmlMatch) {
                 htmlContent = htmlMatch[1];
             } else {
-                // Try to find HTML starting with <html>
                 const htmlMatch2 = response.match(/(<html[\s\S]*?<\/html>)/);
                 if (htmlMatch2) {
                     htmlContent = '<!DOCTYPE html>\n' + htmlMatch2[1];
@@ -183,14 +264,11 @@ Please provide the HTML code in a code block as shown above, along with a brief 
             }
         }
         
-        // If we found HTML content, ensure it's complete and functional
         if (htmlContent) {
-            // Fix common issues with Mermaid
-            if (htmlContent.includes('mermaid')) {
-                htmlContent = this.fixMermaidHTML(htmlContent);
+            if (htmlContent.includes('gojs') || htmlContent.includes('go.GraphObject')) {
+                htmlContent = this.fixGoJSHTML(htmlContent);
             }
             
-            // Ensure Chart.js is properly included
             if (htmlContent.includes('Chart') && !htmlContent.includes('chart.js')) {
                 htmlContent = this.fixChartJSHTML(htmlContent);
             }
@@ -199,46 +277,73 @@ Please provide the HTML code in a code block as shown above, along with a brief 
         return htmlContent.trim();
     },
 
-    fixMermaidHTML(htmlContent) {
-        // Ensure Mermaid script is included
-        if (!htmlContent.includes('mermaid@10/dist/mermaid.min.js') && !htmlContent.includes('mermaid.min.js')) {
+    fixGoJSHTML(htmlContent) {
+        if (!htmlContent.includes('gojs@2.3.13/release/go.js') && !htmlContent.includes('go.js')) {
             const headEndIndex = htmlContent.indexOf('</head>');
             if (headEndIndex !== -1) {
-                const mermaidScript = `    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>\n`;
-                htmlContent = htmlContent.substring(0, headEndIndex) + mermaidScript + htmlContent.substring(headEndIndex);
+                const goJSScript = `    <script src="https://unpkg.com/gojs@2.3.13/release/go.js"></script>\n`;
+                htmlContent = htmlContent.substring(0, headEndIndex) + goJSScript + htmlContent.substring(headEndIndex);
             }
         }
 
-        // Ensure Mermaid is initialized
-        if (!htmlContent.includes('mermaid.initialize')) {
+        if (!htmlContent.includes('diagram-container')) {
+            htmlContent = htmlContent.replace(/<body>/, `<body>
+    <div id="diagram-container" style="width: 100%; height: 600px; background: white; margin: 20px auto;"></div>`);
+        }
+
+        if (!htmlContent.includes('go.GraphObject.make')) {
             const bodyEndIndex = htmlContent.lastIndexOf('</body>');
             if (bodyEndIndex !== -1) {
-                const initScript = `
+                const goJSScript = `
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            mermaid.initialize({
-                startOnLoad: true,
-                theme: 'default',
-                flowchart: {
-                    htmlLabels: true,
-                    curve: 'basis'
-                },
-                securityLevel: 'loose'
-            });
+        const $ = go.GraphObject.make;
+        
+        const diagram = $(go.Diagram, "diagram-container", {
+            "undoManager.isEnabled": true,
+            layout: $(go.TreeLayout, { angle: 90, layerSpacing: 50 }),
+            "grid.visible": true,
+            allowDrop: true,
+            allowTextEdit: true
         });
+
+        diagram.nodeTemplate = $(go.Node, "Auto",
+            $(go.Shape, "RoundedRectangle", 
+                { strokeWidth: 2, fill: "#e1f5fe" },
+                new go.Binding("fill", "color")
+            ),
+            $(go.TextBlock, 
+                { margin: 12, stroke: "#333", font: "14px Arial" },
+                new go.Binding("text", "key")
+            )
+        );
+
+        diagram.linkTemplate = $(go.Link,
+            { routing: go.Link.Orthogonal, corner: 5 },
+            $(go.Shape, { strokeWidth: 2, stroke: "#333" }),
+            $(go.Shape, { toArrow: "Standard", stroke: "#333", fill: "#333" })
+        );
+
+        const nodeDataArray = [
+            { key: "Start", color: "#81c784" },
+            { key: "Process", color: "#ffb74d" },
+            { key: "End", color: "#e57373" }
+        ];
+
+        const linkDataArray = [
+            { from: "Start", to: "Process" },
+            { from: "Process", to: "End" }
+        ];
+
+        diagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
     </script>`;
-                htmlContent = htmlContent.substring(0, bodyEndIndex) + initScript + htmlContent.substring(bodyEndIndex);
+                htmlContent = htmlContent.substring(0, bodyEndIndex) + goJSScript + htmlContent.substring(bodyEndIndex);
             }
         }
-
-        // Remove any module type from scripts
-        htmlContent = htmlContent.replace(/type="module"/g, '');
         
         return htmlContent;
     },
 
     fixChartJSHTML(htmlContent) {
-        // Ensure Chart.js is included
         if (!htmlContent.includes('chart.js')) {
             const headEndIndex = htmlContent.indexOf('</head>');
             if (headEndIndex !== -1) {
@@ -247,9 +352,7 @@ Please provide the HTML code in a code block as shown above, along with a brief 
             }
         }
 
-        // Fix Chart.js responsive issues by adding proper CSS and configuration
         if (!htmlContent.includes('chart-container') && htmlContent.includes('<canvas')) {
-            // Add proper CSS for chart sizing
             const styleEndIndex = htmlContent.indexOf('</style>');
             if (styleEndIndex !== -1) {
                 const chartCSS = `
@@ -269,16 +372,12 @@ Please provide the HTML code in a code block as shown above, along with a brief 
                 htmlContent = htmlContent.substring(0, styleEndIndex) + chartCSS + htmlContent.substring(styleEndIndex);
             }
 
-            // Wrap canvas in container div
             htmlContent = htmlContent.replace(/<canvas([^>]*)>/g, '<div class="chart-container"><canvas$1>');
             htmlContent = htmlContent.replace(/<\/canvas>/g, '</canvas></div>');
 
-            // Fix Chart.js configuration to prevent expanding
             const chartConfigPattern = /new Chart\(([^,]+),\s*{([^}]+(?:{[^}]*}[^}]*)*[^}]*)}\)/g;
             htmlContent = htmlContent.replace(chartConfigPattern, (match, canvasRef, config) => {
-                // Check if responsive and maintainAspectRatio are already set
                 if (!config.includes('responsive') || !config.includes('maintainAspectRatio')) {
-                    // Add responsive configuration
                     const optionsMatch = config.match(/options:\s*{([^}]+(?:{[^}]*}[^}]*)*[^}]*)}/);
                     if (optionsMatch) {
                         const existingOptions = optionsMatch[1];
@@ -293,7 +392,6 @@ Please provide the HTML code in a code block as shown above, along with a brief 
                         }`;
                         config = config.replace(existingOptions, newOptions);
                     } else {
-                        // Add options if not present
                         config += `,
                         options: {
                             responsive: true,
@@ -343,10 +441,9 @@ Please provide the HTML code in a code block as shown above, along with a brief 
         if (this.isGraphResponse(message)) {
             const graphHTML = this.extractGraphHTML(message);
             
-            console.log('Graph HTML extracted:', graphHTML ? 'Found' : 'Not found'); // Debug log
+            console.log('Graph HTML extracted:', graphHTML ? 'Found' : 'Not found');
             
             if (graphHTML) {
-                // Clean the message by removing HTML code blocks and markers
                 let cleanMessage = message
                     .replace(/```html\s*[\s\S]*?\s*```/, '')
                     .replace(/(<!DOCTYPE html>[\s\S]*?<\/html>)/, '')
@@ -354,14 +451,12 @@ Please provide the HTML code in a code block as shown above, along with a brief 
                     .replace(/\[INTERACTIVE_GRAPH_READY\]/, '')
                     .replace(/\[INTERACTIVE_FLOWCHART_READY\]/, '');
 
-                // Remove common patterns
                 const metadataPattern = /1\..+?5\..+?\*\*\)/s;
                 cleanMessage = cleanMessage.replace(metadataPattern, '');
                 cleanMessage = cleanMessage.replace(/Here's.*?(HTML|code).*?:/i, '');
                 const introPattern = /^I can create.*?(Instead, I will create|Here's)/is;
                 cleanMessage = cleanMessage.replace(introPattern, '');
 
-                // If message is too short after cleaning, provide a default
                 if (cleanMessage.trim().length < 20) {
                     cleanMessage = 'I\'ve created an interactive visualization for you. Click below to view it in a new window.';
                 }
@@ -383,7 +478,7 @@ Please provide the HTML code in a code block as shown above, along with a brief 
 
                 return container;
             } else {
-                console.log('No valid HTML found in response:', message.substring(0, 200)); // Debug log
+                console.log('No valid HTML found in response:', message.substring(0, 200));
             }
         }
 
@@ -505,17 +600,14 @@ Please provide the HTML code in a code block as shown above, along with a brief 
     extractPPTHTML(response) {
         let htmlContent = '';
         
-        // First try to extract from markdown code block
         const htmlBlockMatch = response.match(/```html\s*([\s\S]*?)\s*```/);
         if (htmlBlockMatch) {
             htmlContent = htmlBlockMatch[1];
         } else {
-            // Try to find HTML without code block markers
             const htmlMatch = response.match(/(<!DOCTYPE html>[\s\S]*?<\/html>)/);
             if (htmlMatch) {
                 htmlContent = htmlMatch[1];
             } else {
-                // Try to find HTML starting with <html>
                 const htmlMatch2 = response.match(/(<html[\s\S]*?<\/html>)/);
                 if (htmlMatch2) {
                     htmlContent = '<!DOCTYPE html>\n' + htmlMatch2[1];
@@ -555,7 +647,7 @@ Please provide the HTML code in a code block as shown above, along with a brief 
         if (this.isPPTResponse(message)) {
             const pptHTML = this.extractPPTHTML(message);
             
-            console.log('PPT HTML extracted:', pptHTML ? 'Found' : 'Not found'); // Debug log
+            console.log('PPT HTML extracted:', pptHTML ? 'Found' : 'Not found');
             
             if (pptHTML) {
                 let cleanMessage = message
@@ -591,7 +683,7 @@ Please provide the HTML code in a code block as shown above, along with a brief 
 
                 return container;
             } else {
-                console.log('No valid HTML found in PPT response:', message.substring(0, 200)); // Debug log
+                console.log('No valid HTML found in PPT response:', message.substring(0, 200));
             }
         }
 
@@ -599,7 +691,6 @@ Please provide the HTML code in a code block as shown above, along with a brief 
     }
 };
 
-// Rest of your TeacherAssistant code remains the same
 const TeacherAssistant = {
     init() {
         this.injectCSS();
@@ -613,7 +704,6 @@ const TeacherAssistant = {
         window.getMiloResponse = async function(query) {
             const lowerQuery = query.toLowerCase();
 
-            // PPT keywords
             const pptKeywords = [
                 'create presentation', 'make presentation', 'generate presentation',
                 'create ppt', 'make ppt', 'generate ppt', 'powerpoint',
@@ -623,7 +713,6 @@ const TeacherAssistant = {
                 'interactive presentation', 'classroom presentation'
             ];
 
-            // Flow and graph keywords
             const flowKeywords = ['flowchart', 'flow chart', 'data flow', 'dfd', 'process diagram', 'architecture diagram', 'system design', 'component diagram', 'uml', 'structure', 'network diagram', 'database schema', 'er diagram', 'class diagram', 'sequence diagram', 'use case diagram', 'activity diagram', 'state diagram', 'deployment diagram', 'system architecture', 'software architecture', 'microservices', 'distributed system'];
             const graphKeywords = [
                 'create chart', 'make chart', 'generate chart', 'draw chart',
@@ -644,6 +733,7 @@ const TeacherAssistant = {
                 flowKeywords.some(k => lowerQuery.includes(k)) || 
                 graphKeywords.some(k => lowerQuery.includes(k))
             );
+
 
             if (isPPTRequest) {
                 const originalPrompt = CONFIG.TEACHER_PROMPT;
@@ -678,7 +768,7 @@ const TeacherAssistant = {
 
         window.appendMessage = function(sender, message, isTyping = false) {
             if (sender === 'bot' && !isTyping) {
-                // Check for PPT response first
+
                 const pptContainer = PPTGenerator.formatPPTMessage(message);
                 if (pptContainer) {
                     const messageDiv = document.createElement('div');
@@ -701,7 +791,7 @@ const TeacherAssistant = {
                     return messageDiv;
                 }
 
-                // Check for graph response
+
                 const graphContainer = GraphCreator.formatGraphMessage(message);
                 if (graphContainer) {
                     const messageDiv = document.createElement('div');
@@ -839,7 +929,7 @@ const TeacherAssistant = {
     }
 };
 
-// Initialize when ready
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => TeacherAssistant.init(), 1000);
