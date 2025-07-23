@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Compiler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.min.css">
+    <style>
+:root {
+            --bg-color: #ffffff;
+            --terminal-bg: #fafbfc;
+            --terminal-border: #e1e8ed;
+            --terminal-header: #f8fafc;
+            --text-color: #1a202c;
+            --text-green: #22c55e;
+            --text-prompt: #3b82f6;
+            --text-user: #f59e0b;
+            --cursor-color: #3b82f6;
+            --code-bg: #ffffff;
+            --border-color: #e1e8ed;
+            --button-bg: #3b82f6;
+            --button-hover: #2563eb;
+            --accent: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --syntax-comment: #6b7280;
+            --syntax-keyword: #8b5cf6;
+            --syntax-string: #10b981;
+            --syntax-variable: #f59e0b;
+            --syntax-function: #3b82f6;
+            --syntax-number: #ec4899;
+            --syntax-operator: #1a202c;
+            --syntax-meta: #ef4444;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.02) 0%, transparent 50%);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, var(--text-color) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .editor-section, .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--terminal-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--terminal-border);
+            transition: box-shadow 0.2s ease;
+            border:1px solid black;
+        }
+
+        .editor-section:hover, .output-section:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            background: var(--terminal-header);
+            border-bottom: 1px solid var(--terminal-border);
+            display: flex;
+            align-items: center;
+            
+        }
+
+        .section-title {
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            padding: 16px 20px;
+            background: var(--terminal-header);
+            border-bottom: 1px solid var(--terminal-border);
+        }
+
+        select, button {
+            background: var(--code-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            font-weight: 500;
+        }
+
+        select {
+            min-width: 140px;
+        }
+
+        select:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        button {
+            background: var(--button-bg);
+            color: #ffffff;
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button#runBtn:before {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: var(--card-shadow);
+        }
+
+        .CodeMirror {
+            flex: 1;
+            height: auto !important;
+            font-size: 14px;
+            background: var(--code-bg) !important;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: var(--text-color) !important;
+        }
+
+        .CodeMirror-gutters {
+            background: #f8fafc !important;
+            border-right: 1px solid var(--terminal-border) !important;
+        }
+
+        .CodeMirror-linenumber {
+            color: var(--syntax-comment) !important;
+        }
+
+        .CodeMirror pre.CodeMirror-line, 
+        .CodeMirror pre.CodeMirror-line-like {
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace !important;
+        }
+
+        .cm-s-default.CodeMirror {
+            background: var(--code-bg) !important;
+            color: var(--text-color) !important;
+        }
+
+        .cm-s-default .cm-keyword {
+            color: var(--syntax-keyword) !important;
+            font-weight: 600;
+        }
+
+        .cm-s-default .cm-string {
+            color: var(--syntax-string) !important;
+        }
+
+        .cm-s-default .cm-variable {
+            color: var(--text-color) !important;
+        }
+
+        .cm-s-default .cm-variable-2 {
+            color: var(--accent) !important;
+        }
+
+        .cm-s-default .cm-def, 
+        .cm-s-default .cm-property {
+            color: var(--syntax-function) !important;
+        }
+
+        .cm-s-default .cm-comment {
+            color: var(--syntax-comment) !important;
+            font-style: italic;
+        }
+
+        .cm-s-default .cm-number {
+            color: var(--syntax-number) !important;
+        }
+
+        .cm-s-default .cm-operator {
+            color: var(--text-color) !important;
+        }
+
+        .cm-s-default .cm-meta {
+            color: var(--syntax-keyword) !important;
+        }
+
+        .cm-s-monokai.CodeMirror {
+            background: var(--code-bg) !important;
+            color: var(--text-color) !important;
+        }
+
+        .cm-s-monokai .cm-keyword {
+            color: var(--syntax-keyword) !important;
+        }
+
+        .cm-s-monokai .cm-string {
+            color: var(--syntax-string) !important;
+        }
+
+        .cm-s-monokai .cm-variable {
+            color: var(--text-color) !important;
+        }
+
+        .cm-s-monokai .cm-variable-2 {
+            color: var(--accent) !important;
+        }
+
+        .cm-s-monokai .cm-def, 
+        .cm-s-monokai .cm-property {
+            color: var(--syntax-function) !important;
+        }
+
+        .cm-s-monokai .cm-comment {
+            color: var(--syntax-comment) !important;
+        }
+
+        .cm-s-monokai .cm-number {
+            color: var(--syntax-number) !important;
+        }
+
+        .CodeMirror-activeline-background {
+            background: rgba(59, 130, 246, 0.05) !important;
+        }
+
+        .CodeMirror-selected {
+            background: rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .CodeMirror-focused .CodeMirror-selected {
+            background: rgba(59, 130, 246, 0.15) !important;
+        }
+
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--cursor-color) !important;
+            border-right: none;
+            width: 2px;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        #code {
+            width: 100%;
+            height: 320px;
+            min-height: 200px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 16px;
+            resize: vertical;
+            border: none;
+            background-color: var(--code-bg);
+            color: var(--text-color);
+            tab-size: 4;
+            caret-color: var(--cursor-color);
+            outline: none;
+        }
+
+        #code:focus {
+            outline: none;
+        }
+
+        .output-container {
+            flex: 1;
+            padding: 20px;
+            background: var(--terminal-bg);
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-y: auto;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .output-content {
+            margin-left: 0;
+        }
+
+        .stdin-container {
+            padding: 20px;
+            background: var(--terminal-header);
+            border-top: 1px solid var(--terminal-border);
+        }
+
+        .stdin-container textarea {
+            width: 100%;
+            height: 80px;
+            background: var(--code-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            resize: vertical;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+            caret-color: var(--cursor-color);
+            outline: none;
+        }
+
+        .stdin-container textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .loading {
+            display: none;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--terminal-border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .success {
+            color: var(--text-green);
+        }
+
+        .error {
+            color: var(--syntax-meta);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--terminal-header);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 20px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeOut 3s forwards;
+            animation-delay: 2s;
+            font-weight: 500;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: var(--text-green);
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--syntax-meta);
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                gap: 16px;
+            }
+            
+            body {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .editor-section, .output-section {
+                min-height: 300px;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            select, button {
+                flex: 1;
+                min-width: 100px;
+            }
+            
+            body {
+                padding: 12px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Code Compiler</h1>
+    </header>
+    
+    <div class="container">
+        <div class="editor-section">
+            <div class="section-header">
+                <div class="section-title">Code Editor</div>
+            </div>
+            <div class="controls">
+                <select id="language">
+                    <option value="c">C</option>
+    <option value="cpp">C++</option>
+    <option value="python">Python</option>
+    <option value="java">Java</option>
+    <option value="go">Go</option>
+    <option value="ruby">Ruby</option>
+    <option value="php">PHP</option>
+    <option value="rust">Rust</option>
+    <option value="csharp">C#</option>
+    <option value="fsharp">F#</option>
+    <option value="kotlin">Kotlin</option>
+    <option value="swift">Swift</option>
+    <option value="haskell">Haskell</option>
+    <option value="perl">Perl</option>
+    <option value="r">R</option>
+    <option value="lua">Lua</option>
+    <option value="dart">Dart</option>
+    <option value="bash">Bash</option>
+    <option value="powershell">PowerShell</option>
+    <option value="lisp">Lisp</option>
+    <option value="julia">Julia</option>
+    <option value="erlang">Erlang</option>
+<option value="nim">Nim</option>
+<option value="zig">Zig</option>
+<option value="elixir">Elixir</option>
+<option value="ocaml">OCaml</option>
+<option value="crystal">Crystal</option>
+<option value="clojure">Clojure</option>
+<option value="scala">Scala</option>
+                </select>
+                <button id="runBtn">Run Code</button>
+            </div>
+            <textarea id="code" placeholder="Write your code here..."></textarea>
+            <div class="stdin-container">
+                <textarea id="stdin" placeholder="Enter program input here (if needed)"></textarea>
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <div class="section-header">
+                <div class="section-title">Output Terminal</div>
+            </div>
+            <div class="output-container" id="output">
+                <div class="output-content"></div>
+            </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+<!-- Core CodeMirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/ruby/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/swift/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/haskell/haskell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/perl/perl.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/r/r.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/lua/lua.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/powershell/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/dart/dart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/commonlisp/commonlisp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/lua/lua.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/julia/julia.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/erlang/erlang.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/nim/nim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/zig/zig.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/elixir/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/mllike/mllike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/crystal/crystal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clojure/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/fortran/fortran.min.js"></script>
+
+    
+    
+    <script>
+      class CodeCompiler {
+    constructor() {
+        this.languageConfig = {
+            python: { version: "3.10.0", mode: "python" },
+            cpp: { version: "10.2.0", mode: "text/x-c++src" },
+            java: { version: "15.0.2", mode: "text/x-java" },
+            go: { version: "1.16.2", mode: "go" },
+            ruby: { version: "3.0.1", mode: "ruby" },
+            php: { version: "8.2.3", mode: "text/x-php" },
+            c: { version: "10.2.0", mode: "text/x-csrc" },
+            rust: { version: "1.68.2", mode: "text/x-rustsrc" },
+            csharp: { version: "6.12.0", mode: "text/x-csharp" },
+            kotlin: { version: "1.8.20", mode: "text/x-kotlin" },
+            swift: { version: "5.3.3", mode: "text/x-swift" },
+            haskell: { version: "9.0.1", mode: "text/x-haskell" },
+            perl: { version: "5.36.0", mode: "text/x-perl" },
+            r: { version: "4.1.1", mode: "text/x-rsrc" },
+            lua: { version: "5.4.4", mode: "text/x-lua" },
+            dart: { version: "2.19.6", mode: "application/dart" },
+            bash: { version: "5.2.0", mode: "text/x-sh" },
+            powershell: { version: "7.1.4", mode: "application/x-powershell" },
+            lisp: { version: "2.1.2", mode: "text/x-common-lisp" },
+            julia: { version: "1.8.5", mode: "text/x-julia" },
+            fsharp: { version: "5.0.1", mode: "text/x-fsharp" },
+            erlang: { version: "23.0.0", mode: "text/x-erlang" },
+            nim: { version: "1.6.2", mode: "text/x-nim" },
+            zig: { version: "0.10.1", mode: "text/x-zig" },
+            elixir: { version: "1.11.3", mode: "text/x-elixir" },
+            ocaml: { version: "4.12.0", mode: "text/x-ocaml" },
+            crystal: { version: "0.36.1", mode: "text/x-crystal" },
+            clojure: { version: "1.10.3", mode: "text/x-clojure" },
+            scala: { version: "3.2.2", mode: "text/x-scala" },
+            typescript: { version: "5.0.3", mode: "text/typescript" }
+        };
+
+        this.initializeEditor();
+        this.setupEventListeners();
+        this.initializeSessionStorage();
+    }
+
+    initializeEditor() {
+        this.editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            lineNumbers: true,
+            theme: "monokai",
+            mode: "python",
+            tabSize: 4,
+            lineWrapping: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            styleActiveLine: true,
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            extraKeys: {
+                "Ctrl-Space": "autocomplete",
+                "Tab": (cm) => cm.execCommand("indentMore"),
+                "Shift-Tab": (cm) => cm.execCommand("indentLess"),
+                "Ctrl-S": (cm) => this.saveToSessionStorage(),
+                "Ctrl-Alt-F": (cm) => this.formatCode()
+            }
+        });
+
+        this.elements = {
+            languageSelect: document.getElementById("language"),
+            runButton: document.getElementById("runBtn"),
+            output: document.getElementById("output"),
+            loading: document.getElementById("loading"),
+            stdin: document.getElementById("stdin"),
+            formatButton: document.createElement("button")
+        };
+
+        this.elements.formatButton.innerHTML = "Format Code";
+        this.elements.formatButton.className = "format-btn";
+
+        const controlsDiv = document.querySelector(".controls");
+        controlsDiv.appendChild(this.elements.formatButton);
+    }
+
+    setupEventListeners() {
+        this.elements.languageSelect.addEventListener("change", (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const redirectUrl = selectedOption.getAttribute('data-redirect');
+            
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+                return;
+            }
+
+            const language = this.elements.languageSelect.value;
+            const mode = this.languageConfig[language]?.mode || "text/plain";
+            this.editor.setOption("mode", mode);
+            this.saveToSessionStorage();
+        });
+
+        this.elements.runButton.addEventListener("click", () => this.runCode());
+        this.elements.formatButton.addEventListener("click", () => this.formatCode());
+
+        this.editor.on("changes", () => {
+            this.saveToSessionStorage();
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                this.runCode();
+            }
+        });
+
+        setInterval(() => this.saveToSessionStorage(), 30000);
+    }
+
+    async runCode() {
+        const code = this.editor.getValue().trim();
+        if (!code) {
+            this.showOutput("⚠️ Error: Please write some code first!");
+            return;
+        }
+
+        this.setLoading(true);
+
+        try {
+            const language = this.elements.languageSelect.value;
+            const response = await this.executeCode(code, language);
+            this.processResponse(response);
+        } catch (error) {
+            this.showOutput(`⚠️ Error: ${error.message}`);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    async executeCode(code, language) {
+        const version = this.languageConfig[language]?.version;
+        if (!version) {
+            throw new Error("Unsupported language selected.");
+        }
+
+        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                language,
+                version,
+                files: [{ content: code }],
+                stdin: this.elements.stdin.value || ""
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${result.message || "Unknown error"}`);
+        }
+
+        return result;
+    }
+
+    processResponse(result) {
+        if (!result.run) {
+            this.showOutput("⚠️ Error: Failed to execute code.");
+            return;
+        }
+
+        let output = [];
+
+        if (result.compile?.stderr) {
+            output.push(`Compilation Error:\n${result.compile.stderr.trim()}`);
+        }
+
+        if (result.run.stdout) {
+            output.push(`Output:\n${result.run.stdout.trim()}`);
+        }
+
+        if (result.run.stderr) {
+            output.push(`Error:\n${result.run.stderr.trim()}`);
+        }
+
+        this.showOutput(output.join("\n\n") || "✨ Program executed successfully with no output.");
+    }
+
+    showOutput(message) {
+        this.elements.output.innerText = message;
+    }
+
+    setLoading(isLoading) {
+        this.elements.loading.style.display = isLoading ? "block" : "none";
+        this.elements.runButton.disabled = isLoading;
+    }
+
+    initializeSessionStorage() {
+        try {
+            const savedState = sessionStorage.getItem('codeCompilerState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                
+                if (state.code) {
+                    this.editor.setValue(state.code);
+                }
+                
+                if (state.language) {
+                    this.elements.languageSelect.value = state.language;
+                    const mode = this.languageConfig[state.language]?.mode || "text/plain";
+                    this.editor.setOption("mode", mode);
+                }
+                
+                if (state.stdin) {
+                    this.elements.stdin.value = state.stdin;
+                }
+                
+                const statusMsg = document.createElement('div');
+                statusMsg.className = 'status-message success';
+                statusMsg.textContent = 'Code restored from session storage';
+                document.querySelector('.editor-section').insertBefore(statusMsg, document.querySelector('.stdin-container'));
+                
+                setTimeout(() => {
+                    if (statusMsg.parentNode) {
+                        statusMsg.parentNode.removeChild(statusMsg);
+                    }
+                }, 3000);
+            }
+        } catch (e) {
+            console.error('Error restoring from session storage', e);
+        }
+    }
+    
+    saveToSessionStorage() {
+        try {
+            const state = {
+                code: this.editor.getValue(),
+                language: this.elements.languageSelect.value,
+                stdin: this.elements.stdin.value,
+                timestamp: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('codeCompilerState', JSON.stringify(state));
+        } catch (e) {
+            console.error('Error saving to session storage', e);
+        }
+    }
+    
+    async formatCode() {
+        const language = this.elements.languageSelect.value;
+        const code = this.editor.getValue();
+        
+        if (!code.trim()) {
+            return;
+        }
+        
+        this.showOutput("Formatting code...");
+        
+        try {
+            let formattedCode;
+            
+            switch (language) {
+                case 'js':
+                    formattedCode = await this.formatWithPrettier(code, 'babel');
+                    break;
+                case 'python':
+                    formattedCode = await this.formatPython(code);
+                    break;
+                case 'java':
+                case 'c':
+                case 'cpp':
+                    formattedCode = await this.formatCFamily(code, language);
+                    break;
+                default:
+                    formattedCode = this.basicFormatting(code);
+            }
+            
+            if (formattedCode && formattedCode !== code) {
+                const cursor = this.editor.getCursor();
+                this.editor.setValue(formattedCode);
+                try {
+                    this.editor.setCursor(cursor);
+                } catch (e) {
+                    this.editor.setCursor(0);
+                }
+                
+                this.showOutput("✅ Code formatted successfully!");
+            } else {
+                this.showOutput("ℹ️ No formatting changes needed.");
+            }
+        } catch (error) {
+            this.showOutput(`⚠️ Formatting error: ${error.message}`);
+            console.error('Formatting error:', error);
+        }
+    }
+    
+    async formatWithPrettier(code, parser) {
+        let formatted = code;
+        
+        formatted = formatted.replace(/\n\s*\n\s*\n/g, '\n\n');
+        
+        const lines = formatted.split('\n');
+        let indentLevel = 0;
+        const indentSize = 2;
+        
+        formatted = lines.map(line => {
+            const trimmedLine = line.trim();
+            
+            if (/^[}\])]/.test(trimmedLine)) {
+                indentLevel = Math.max(0, indentLevel - 1);
+            }
+            
+            const indent = ' '.repeat(indentLevel * indentSize);
+            const formattedLine = trimmedLine ? indent + trimmedLine : '';
+            
+            if (/[{[(]$/.test(trimmedLine)) {
+                indentLevel++;
+            }
+            
+            return formattedLine;
+        }).join('\n');
+        
+        return formatted;
+    }
+    
+    async formatPython(code) {
+        let formatted = code;
+        
+        formatted = formatted.replace(/[ \t]+$/gm, '');
+        
+        const lines = formatted.split('\n');
+        let formattedLines = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            
+            if (!trimmedLine) {
+                formattedLines.push('');
+                continue;
+            }
+            
+            const leadingSpaces = line.match(/^\s*/)[0].length;
+            const indentLevel = Math.floor(leadingSpaces / 4);
+            
+            formattedLines.push(' '.repeat(indentLevel * 4) + trimmedLine);
+        }
+        
+        formatted = formattedLines.join('\n').replace(/\n\s*\n\s*\n/g, '\n\n');
+        
+        return formatted;
+    }
+    
+    async formatCFamily(code, language) {
+        let formatted = code;
+        
+        formatted = formatted.replace(/[ \t]+$/gm, '');
+        
+        formatted = formatted.replace(/\b(if|for|while|switch)\(/g, '$1 (');
+        
+        formatted = formatted.replace(/([^\s])([+\-*/%=<>!&|^])([^\s=])/g, '$1 $2 $3');
+        
+        formatted = formatted.replace(/(\)\s*)\n(\s*{)/g, '$1{\n');
+        formatted = formatted.replace(/}(\s*else)/g, '} $1');
+        
+        return this.basicFormatting(formatted);
+    }
+    
+    basicFormatting(code) {
+        const lines = code.split('\n');
+        let indentLevel = 0;
+        const indentSize = 4;
+        
+        const formattedLines = lines.map(line => {
+            const trimmedLine = line.trim();
+            
+            if (!trimmedLine) return '';
+            
+            if (/^[}\])]/.test(trimmedLine)) {
+                indentLevel = Math.max(0, indentLevel - 1);
+            }
+            
+            const indent = ' '.repeat(indentLevel * indentSize);
+            const formattedLine = indent + trimmedLine;
+            
+            if (/[{[(]$/.test(trimmedLine)) {
+                indentLevel++;
+            }
+            
+            return formattedLine;
+        });
+        
+        return formattedLines.join('\n');
+    }
+}
+
+window.addEventListener("load", () => new CodeCompiler());
+    </script>
+</body>
+</html>

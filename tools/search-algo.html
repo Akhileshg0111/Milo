@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HuddleFusion-SearchAlgorithmVisualizer</title>
+    <style>
+/*:root {
+  --primary-color: #000000; 
+  --secondary-color: #0a0a0a;
+  --accent-color: #c4a045; 
+  --success-color: #44d02b;
+  --danger-color: #d21f1f; 
+  --light-color: #e6e6e6; 
+  --dark-color: #000000;
+  --gold-gradient: linear-gradient(135deg, #c4a045, #e6d0a3);
+  --speed: 500ms;
+  --gold-shadow: 0 4px 12px rgba(196, 160, 69, 0.2); 
+}*/
+
+:root {
+  --primary-color: #3F4D85;              
+  --secondary-color: #5967B0;            
+  --accent-color: #7984CD;               
+  --success-color: #6BD09D;              
+  --danger-color: #EF8F8F;               
+  --light-color: #E5E7EF;                
+  --dark-color: #252B47;                 
+  --blue-gradient: linear-gradient(135deg, #7984CD, #A6AEEA);
+  --speed: 500ms;
+  --blue-shadow: 0 4px 12px rgba(121, 132, 205, 0.2); 
+  --darker-bg: #303756;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: #D1D5E6;              
+  color: #2A3153;                         
+  background: linear-gradient(145deg, #D3D9EF, #C1CCEF);
+}
+
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.5s ease;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeIn 1s ease-in-out;
+  position: relative;
+}
+
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+}
+
+h1 {
+  margin-bottom: 0.1rem;
+  animation: slideDown 0.7s ease;
+  color: var(--primary-color);
+  text-shadow: 0 2px 4px rgba(63, 77, 133, 0.15);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(to bottom, #c8cfe9, rgba(195, 199, 236, 0.95));
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(121, 132, 205, 0.12);
+  transition: box-shadow 0.3s ease;
+  border: 1px solid rgba(137, 119, 197, 0.716);
+}
+
+.controls:hover {
+  box-shadow: var(--blue-shadow);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+  transition: transform 0.2s ease;
+}
+
+.control-group:hover {
+  transform: translateY(-2px);
+}
+
+.full-width {
+  flex-basis: 100%;
+}
+
+label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    opacity: 0.9;
+}
+
+select, input, textarea {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(121, 132, 205, 0.3);
+  font-size: 1rem;
+  background-color: #F0F2F9;             
+  color: var(--dark-color);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+select:focus, input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(121, 132, 205, 0.15);
+}
+
+textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  background-color: var(--accent-color);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid rgba(121, 132, 205, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--blue-shadow);
+  border-color: var(--accent-color);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: 0.5s;
+}
+
+button:hover:before {
+  left: 100%;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.visualization {
+    background: linear-gradient(to bottom, #c8cfe9, rgba(195, 199, 236, 0.95)); /* Dimmer control background */
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(121, 132, 205, 0.15);
+  margin-bottom: 2rem;
+  transition: box-shadow 0.3s ease;
+  border: 1px solid rgba(137, 119, 197, 0.716);
+}
+
+.visualization:hover {
+  box-shadow: var(--blue-shadow);
+}
+
+.array-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 200px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+  perspective: 800px;
+}
+
+.array-bar {
+  margin: 0 2px;
+  background: linear-gradient(to bottom, var(--accent-color), var(--secondary-color));
+  transition: all var(--speed) ease;
+  position: relative;
+  min-width: 40px;
+  max-width: 60px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--light-color);
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(121, 132, 205, 0.25);
+  transform-origin: bottom;
+  border-radius: 6px 6px 0 0;
+}
+
+.array-bar:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px 6px 0 0;
+}
+
+.array-bar:hover {
+  transform: scaleY(1.05);
+  box-shadow: 0 0 12px rgba(121, 132, 205, 0.4);
+}
+
+.current {
+  background: linear-gradient(to bottom, #977BEA, #7B4CE6);
+  box-shadow: 0 0 12px rgba(123, 76, 230, 0.4);
+  animation: pulse 1s infinite alternate;
+}
+
+.found {
+  background: linear-gradient(to bottom, var(--success-color), #4BC190);
+  box-shadow: 0 0 20px rgba(107, 208, 157, 0.6);
+  animation: pop 0.5s ease-out forwards, glow 1.5s ease-in-out infinite alternate;
+  border: 2px solid #FFFFFF;
+  z-index: 100;
+  color: #234536;
+  font-weight: 800;
+  transform: scale(1.1);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.not-found {
+  background: linear-gradient(to bottom, var(--danger-color), #EF7070);
+  box-shadow: 0 0 12px var(--danger-color);
+  animation: shake 0.5s ease;
+}
+
+.info-panel {
+    background: linear-gradient(to bottom, #c8cfe9, rgba(195, 199, 236, 0.95)); /* Dimmer control background */
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(121, 132, 205, 0.15);
+  transition: box-shadow 0.3s ease;
+  border: 1px solid rgba(137, 119, 197, 0.716);
+  color: var(--dark-color);
+}
+
+.info-panel:hover {
+  box-shadow: var(--blue-shadow);
+}
+
+.code-display {
+  background-color: #E0E4EF;             /* Dimmer code background */
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-top: 1rem;
+  position: relative;
+  border-left: 3px solid var(--accent-color);
+}
+
+pre {
+  font-family: 'Courier New', Courier, monospace;
+  white-space: pre-wrap;
+  color: #2A3153;                        /* Darker code text */
+}
+
+.explanation {
+  margin-top: 1rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.step-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.step-btn {
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+}
+
+.logs {
+  background-color: #E0E4EF;             /* Dimmer logs background */
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+  border-left: 3px solid var(--accent-color);
+  transition: max-height 0.3s ease;
+  font-family: 'Courier New', Courier, monospace;
+  color: #2A3153;                        /* Darker logs text */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) #E0E4EF;
+}
+
+.logs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.logs::-webkit-scrollbar-track {
+  background: #E0E4EF;
+}
+
+.logs::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 3px;
+}
+
+.logs:hover {
+  max-height: 300px;
+}
+
+.alert {
+  padding: 0.5rem 1rem;
+  background-color: rgba(121, 132, 205, 0.1);
+  color: var(--primary-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--accent-color);
+  animation: slideIn 0.5s ease;
+}
+
+.error {
+  background-color: rgba(239, 143, 143, 0.1);
+  color: #C44848;                        /* Darker error text */
+  border-left: 3px solid var(--danger-color);
+}
+
+#a {
+  text-decoration: none;
+  float: right;
+  font-size: 17px;
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background-color: rgba(240, 242, 249, 0.8); /* Dimmer button background */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#a:hover {
+  background-color: var(--accent-color);
+  color: #FFFFFF;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #E3E9FF;
+  border-radius: 6px;
+  outline: none;
+  border: 1px solid rgba(138, 148, 221, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  border: 1px solid rgba(138, 148, 221, 0.3);
+  box-shadow: 0 0 4px rgba(138, 148, 221, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  border: 1px solid rgba(138, 148, 221, 0.3);
+  box-shadow: 0 0 4px rgba(138, 148, 221, 0.2);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 6px rgba(138, 148, 221, 0.4);
+  transform: scale(1.1);
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+    box-shadow: 0 0 6px rgba(138, 148, 221, 0.4);
+  transform: scale(1.1);
+}
+
+input[type="range"]:focus {
+    box-shadow: 0 0 0 2px rgba(138, 148, 221, 0.15);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  to { opacity: 0.8; }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  75% { transform: scale(1.15); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes bounceUp {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 12px rgba(107, 208, 157, 0.4); }
+  100% { box-shadow: 0 0 25px rgba(107, 208, 157, 0.7); }
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    padding: 0.8rem;
+  }
+  
+  .array-container {
+    height: 180px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  
+  .array-bar {
+    min-width: 30px;
+    max-width: 40px;
+    font-size: 0.7rem;
+    margin: 0 1px;
+  }
+  
+  .visualization {
+    padding: 0.8rem;
+    overflow: hidden;
+  }
+  
+  button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .step-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .info-panel {
+    padding: 1rem;
+  }
+  
+  .code-display {
+    padding: 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  #a {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  
+  h1 {
+    font-size: 1.4rem;
+  }
+  
+  .logs {
+    max-height: 150px;
+  }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Search Algorithm Visualizer</h1>
+            <p>Visualize and understand how different search algorithms work</p>
+            <select id="a" onchange="redirectToPage()">
+                <option value="#" disabled selected>Other Algos</option>
+                <option value="sort-algo">Sort Algo</option>
+                <option value="trees.html">Trees Algo</option>
+            </select>
+            
+            <script>
+            function redirectToPage() {
+                var selectElement = document.getElementById("a");
+                var selectedValue = selectElement.value;
+            
+                if (selectedValue === "sort-algo") 
+                {  
+                    window.location.href = "sort-algo.html";
+                    
+                } else if (selectedValue === "trees.html") {
+                    window.location.href = "trees.html";
+                }
+            }
+            </script>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="algorithm">Algorithm:</label>
+                <select id="algorithm">
+                    <option value="linear">Linear Search</option>
+                    <option value="binary">Binary Search</option>
+                    <option value="jump">Jump Search</option>
+                    <option value="interpolation">Interpolation Search</option>
+      <option value="fibonacci">Fibonacci Search</option>
+      <option value="exponential">Exponential Search</option>
+      <option value="ternary">Ternary Search</option>
+      <option value="sentinelLinear">sentinel Linear Search</option>
+      <option value="metaBinary">Meta Binary Search</option>
+      <option value="galloping">Galloping Search</option>
+      <option value="sublist">Sublist Search</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="search-value">Search For:</label>
+                <input type="number" id="search-value" min="1" value="42">
+            </div>
+
+            <div class="control-group">
+                <label for="animation-speed">Animation Speed:</label>
+                <input type="range" id="animation-speed"  min="100" max="500" value="100">
+            </div>
+
+            <div class="control-group full-width">
+                <label for="user-array">Enter Array Elements (comma-separated numbers):</label>
+                <textarea id="user-array" placeholder="e.g., 5, 10, 15, 20, 25, 30, 35, 40, 45, 50">5, 10, 15, 20, 25, 30, 35, 40, 45, 50</textarea>
+                <div id="array-error" class="alert error" style="display: none;"></div>
+            </div>
+
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <div class="btn-group">
+                    <button id="random-array-btn">Generate Random Array</button>
+                    <button id="sort-array-btn">Sort Array</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button id="start-btn">Start Search</button>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <h2>Visualization</h2>
+            <div id="algorithm-warning" class="alert" style="display: none;">
+                Note: Binary and Jump Search require a sorted array for correct results.
+            </div>
+            <div class="array-container" id="array-container"></div>
+            <div class="step-controls">
+                <button id="prev-step-btn" class="step-btn" disabled>Previous Step</button>
+                <button id="next-step-btn" class="step-btn" disabled>Next Step</button>
+            </div>
+            <div class="logs" id="logs"></div>
+        </div>
+
+        <div class="info-panel">
+            <h2>Algorithm Info</h2>
+            <div id="algorithm-info">
+                <h3>Linear Search</h3>
+                <p>Linear search is a simple search algorithm that checks each element in the list sequentially until the target element is found or the list ends.</p>
+                <div class="code-display">
+                    <pre id="algorithm-code">function linearSearch(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === target) {
+            return i; // Found the target at index i
+        }
+    }
+    return -1; // Target not found
+}</pre>
+                </div>
+                <div class="explanation" id="algorithm-explanation">
+                    <h4>How it works:</h4>
+                    <ul>
+                        <li><strong>Time Complexity:</strong> O(n) - In the worst case, we need to check all elements</li>
+                        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+                        <li><strong>Best for:</strong> Small arrays or unsorted data</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         
+const algorithmSelect = document.getElementById('algorithm');
+const searchValueInput = document.getElementById('search-value');
+const animationSpeedInput = document.getElementById('animation-speed');
+const userArrayInput = document.getElementById('user-array');
+const randomArrayBtn = document.getElementById('random-array-btn');
+const sortArrayBtn = document.getElementById('sort-array-btn');
+const startBtn = document.getElementById('start-btn');
+const prevStepBtn = document.getElementById('prev-step-btn');
+const nextStepBtn = document.getElementById('next-step-btn');
+const arrayContainer = document.getElementById('array-container');
+const algorithmCode = document.getElementById('algorithm-code');
+const algorithmInfo = document.getElementById('algorithm-info');
+const logsContainer = document.getElementById('logs');
+const arrayError = document.getElementById('array-error');
+const algorithmWarning = document.getElementById('algorithm-warning');
+
+// State variables
+let array = [];
+let searchSteps = [];
+let currentStepIndex = -1;
+let animationSpeed = 1000; 
+let animationInterval;
+let isSearchRunning = false;
+
+// Algorithm information
+const algorithmInfoData = {
+    linear: {
+        name: 'Linear Search',
+        description: 'Linear search is a simple search algorithm that checks each element in the list sequentially until the target element is found or the list ends.',
+        code: `function linearSearch(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === target) {
+            return i; // Found the target at index i
+        }
+    }
+    return -1; // Target not found
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(n) - In the worst case, we need to check all elements</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Best for:</strong> Small arrays or unsorted data</li>
+        </ul>`,
+        requireSorted: false
+    },
+    binary: {
+        name: 'Binary Search',
+        description: 'Binary search is an efficient algorithm for finding an item from a sorted list of items. It works by repeatedly dividing in half the portion of the list that could contain the item, until you\'ve narrowed down the possible locations to just one.',
+        code: `function binarySearch(arr, target) {
+    let left = 0;
+    let right = arr.length - 1;
+    
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        if (arr[mid] === target) {
+            return mid; // Found the target at index mid
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1; // Target is in the right half
+        } else {
+            right = mid - 1; // Target is in the left half
+        }
+    }
+    
+    return -1; // Target not found
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(log n) - We divide the search space in half each time</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Requires:</strong> Sorted array</li>
+            <li><strong>Best for:</strong> Large sorted datasets</li>
+        </ul>`,
+        requireSorted: true
+    },
+    jump: {
+        name: 'Jump Search',
+        description: 'Jump search is a searching algorithm for sorted arrays. The basic idea is to check fewer elements than linear search by jumping ahead by fixed steps or skipping some elements in place of searching all elements.',
+        code: `function jumpSearch(arr, target) {
+    const n = arr.length;
+    const step = Math.floor(Math.sqrt(n));
+    
+    let prev = 0;
+    while (arr[Math.min(step, n) - 1] < target) {
+        prev = step;
+        step += Math.floor(Math.sqrt(n));
+        if (prev >= n) return -1;
+    }
+    
+    // Linear search in the block
+    while (arr[prev] < target) {
+        prev++;
+        if (prev === Math.min(step, n)) return -1;
+    }
+    
+    if (arr[prev] === target) return prev;
+    
+    return -1; // Not found
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(√n) - Better than linear search but worse than binary search</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Requires:</strong> Sorted array</li>
+            <li><strong>Best for:</strong> When binary search is costly (like in linked lists)</li>
+        </ul>`,
+        requireSorted: true
+    },
+    interpolation: {
+        name: 'Interpolation Search',
+        description: 'Interpolation search is an improved variant of binary search. It works on the probing position formula. For uniformly distributed sorted arrays, it can achieve O(log log n) time complexity.',
+        code: `function interpolationSearch(arr, target) {
+    let low = 0;
+    let high = arr.length - 1;
+    
+    while (low <= high && target >= arr[low] && target <= arr[high]) {
+        if (low === high) {
+            if (arr[low] === target) return low;
+            return -1;
+        }
+        
+        // Probe position formula
+        let pos = low + Math.floor(
+            ((target - arr[low]) * (high - low)) / 
+            (arr[high] - arr[low])
+        );
+        
+        if (arr[pos] === target) {
+            return pos;
+        }
+        
+        if (arr[pos] < target) {
+            low = pos + 1;
+        } else {
+            high = pos - 1;
+        }
+    }
+    
+    return -1; // Not found
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(log log n) for uniformly distributed data, O(n) worst case</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Requires:</strong> Sorted array with uniform distribution</li>
+            <li><strong>Best for:</strong> Large, uniformly distributed, sorted arrays</li>
+        </ul>`,
+        requireSorted: true
+    },
+    fibonacci: {
+        name: 'Fibonacci Search',
+        description: 'Fibonacci search is a comparison-based technique that uses Fibonacci numbers to search an element in a sorted array. It divides the array into unequal parts and uses the divide and conquer approach.',
+        code: `function fibonacciSearch(arr, target) {
+    const n = arr.length;
+    
+    // Find the smallest Fibonacci number greater than or equal to n
+    let fibM2 = 0;   // (m-2)'th Fibonacci number
+    let fibM1 = 1;   // (m-1)'th Fibonacci number
+    let fibM = fibM1 + fibM2;  // m'th Fibonacci number
+    
+    while (fibM < n) {
+        fibM2 = fibM1;
+        fibM1 = fibM;
+        fibM = fibM1 + fibM2;
+    }
+    
+    // Marks the eliminated range from front
+    let offset = -1;
+    
+    // While there are elements to be inspected
+    while (fibM > 1) {
+        // Check if fibM2 is a valid index
+        let i = Math.min(offset + fibM2, n - 1);
+        
+        // If target is greater than the element at index i,
+        // cut the subarray from offset to i
+        if (arr[i] < target) {
+            fibM = fibM1;
+            fibM1 = fibM2;
+            fibM2 = fibM - fibM1;
+            offset = i;
+        }
+        // If target is less than the element at index i,
+        // cut the subarray after i+1
+        else if (arr[i] > target) {
+            fibM = fibM2;
+            fibM1 = fibM1 - fibM2;
+            fibM2 = fibM - fibM1;
+        }
+        // Element found
+        else {
+            return i;
+        }
+    }
+    
+    // Compare the last element
+    if (fibM1 && arr[offset + 1] === target) {
+        return offset + 1;
+    }
+    
+    // Target not found
+    return -1;
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(log n) - Similar to binary search</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Requires:</strong> Sorted array</li>
+            <li><strong>Advantage:</strong> Uses only addition and subtraction (no division)</li>
+            <li><strong>Best for:</strong> Systems where division operation is costly</li>
+        </ul>`,
+        requireSorted: true
+    },
+    exponential: {
+        name: 'Exponential Search',
+        description: 'Exponential search involves two steps: finding a range where the element might exist and then performing a binary search within that range. It works well for unbounded or infinite arrays.',
+        code: `function exponentialSearch(arr, target) {
+    const n = arr.length;
+    
+    // If target is the first element
+    if (arr[0] === target) {
+        return 0;
+    }
+    
+    // Find range for binary search
+    let i = 1;
+    while (i < n && arr[i] <= target) {
+        i *= 2;
+    }
+    
+    // Perform binary search in the range [i/2, min(i, n-1)]
+    return binarySearchInRange(
+        arr, 
+        target, 
+        Math.floor(i / 2), 
+        Math.min(i, n - 1)
+    );
+}
+
+function binarySearchInRange(arr, target, left, right) {
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        if (arr[mid] === target) {
+            return mid;
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return -1;
+}`,
+        explanation: `<h4>How it works:</h4>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(log n) - The range finding is O(log n) and binary search is O(log n)</li>
+            <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+            <li><strong>Requires:</strong> Sorted array</li>
+            <li><strong>Best for:</strong> Unbounded searches and when the element is likely near the beginning</li>
+        </ul>`,
+        requireSorted: true
+    },
+    // Add these to your existing algorithmInfoData object
+ternary: {
+    name: 'Ternary Search',
+    description: 'Ternary search is a divide-and-conquer algorithm that divides the search space into three parts rather than two. It\'s particularly useful for finding extrema in unimodal functions.',
+    code: `function ternarySearch(arr, target) {
+    let left = 0;
+    let right = arr.length - 1;
+    
+    while (left <= right) {
+        let mid1 = left + Math.floor((right - left) / 3);
+        let mid2 = right - Math.floor((right - left) / 3);
+        
+        if (arr[mid1] === target) {
+            return mid1;
+        }
+        
+        if (arr[mid2] === target) {
+            return mid2;
+        }
+        
+        if (target < arr[mid1]) {
+            right = mid1 - 1;
+        } else if (target > arr[mid2]) {
+            left = mid2 + 1;
+        } else {
+            left = mid1 + 1;
+            right = mid2 - 1;
+        }
+    }
+    
+    return -1; // Not found
+}`,
+    explanation: `<h4>How it works:</h4>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(log₃ n) - We divide the search space into three parts</li>
+        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+        <li><strong>Requires:</strong> Sorted array</li>
+        <li><strong>Best for:</strong> When dividing the array into three parts is more efficient than two</li>
+    </ul>`,
+    requireSorted: true
+},
+
+sentinelLinear: {
+    name: 'Sentinel Linear Search',
+    description: 'Sentinel linear search is an optimization over standard linear search. It places the target value at the end of the array to eliminate boundary checking in each iteration.',
+    code: `function sentinelLinearSearch(arr, target) {
+    const n = arr.length;
+    
+    // Store the last element
+    const last = arr[n-1];
+    
+    // Replace last element with target (the sentinel)
+    arr[n-1] = target;
+    
+    let i = 0;
+    while (arr[i] !== target) {
+        i++;
+    }
+    
+    // Restore the last element
+    arr[n-1] = last;
+    
+    // Check if we found the element or just hit the sentinel
+    if (i < n-1 || last === target) {
+        return i;
+    }
+    
+    return -1; // Not found
+}`,
+    explanation: `<h4>How it works:</h4>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(n) - Still checks elements linearly</li>
+        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+        <li><strong>Advantage:</strong> Eliminates boundary check in inner loop, potentially faster</li>
+        <li><strong>Best for:</strong> Optimizing linear search when modifying the array temporarily is acceptable</li>
+    </ul>`,
+    requireSorted: false
+},
+
+metaBinary: {
+    name: 'Meta Binary Search',
+    description: 'Meta binary search (also known as one-sided binary search) uses bitwise operations to simulate binary search. It\'s particularly useful for searching in certain specialized data structures.',
+    code: `function metaBinarySearch(arr, target) {
+    const n = arr.length;
+    const bits = Math.floor(Math.log2(n)) + 1;
+    
+    let pos = 0;
+    
+    for (let i = bits - 1; i >= 0; i--) {
+        const testPos = pos | (1 << i);
+        
+        if (testPos < n && arr[testPos] <= target) {
+            pos = testPos;
+        }
+    }
+    
+    if (arr[pos] === target) {
+        return pos;
+    }
+    
+    return -1; // Not found
+}`,
+    explanation: `<h4>How it works:</h4>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(log n) - Similar to binary search</li>
+        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+        <li><strong>Requires:</strong> Sorted array</li>
+        <li><strong>Advantage:</strong> Uses bitwise operations which can be faster on some hardware</li>
+    </ul>`,
+    requireSorted: true
+},
+
+galloping: {
+    name: 'Galloping Search',
+    description: 'Galloping search (also known as doubling search) starts with a small range and exponentially increases it until the target element is bounded. It then applies binary search in that range.',
+    code: `function gallopingSearch(arr, target) {
+    const n = arr.length;
+    
+    if (arr[0] === target) {
+        return 0;
+    }
+    
+    // Find range for binary search
+    let k = 1;
+    while (k < n && arr[k] < target) {
+        k *= 2;
+    }
+    
+    // Perform binary search
+    return binarySearchInRange(
+        arr, 
+        target, 
+        Math.floor(k/2), 
+        Math.min(k, n-1)
+    );
+}
+
+function binarySearchInRange(arr, target, left, right) {
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        if (arr[mid] === target) {
+            return mid;
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return -1;
+}`,
+    explanation: `<h4>How it works:</h4>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(log i) where i is the position of the target</li>
+        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+        <li><strong>Requires:</strong> Sorted array</li>
+        <li><strong>Best for:</strong> When the target is likely to be near the beginning of a sorted array</li>
+    </ul>`,
+    requireSorted: true
+},
+
+sublist: {
+    name: 'Sublist Search',
+    description: 'Sublist search looks for a pattern (subarray) within the main array. It\'s similar to string pattern matching algorithms but applied to arrays of any data type.',
+    code: `function sublistSearch(arr, pattern) {
+    const n = arr.length;
+    const m = pattern.length;
+    
+    for (let i = 0; i <= n - m; i++) {
+        let j;
+        
+        // Check if current window matches pattern
+        for (j = 0; j < m; j++) {
+            if (arr[i + j] !== pattern[j]) {
+                break;
+            }
+        }
+        
+        if (j === m) {
+            return i; // Pattern found at index i
+        }
+    }
+    
+    return -1; // Pattern not found
+}`,
+    explanation: `<h4>How it works:</h4>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(n*m) where n is array length and m is pattern length</li>
+        <li><strong>Space Complexity:</strong> O(1) - Uses constant extra space</li>
+        <li><strong>Best for:</strong> Finding subarrays within larger arrays</li>
+        <li><strong>Note:</strong> More efficient algorithms like KMP or Boyer-Moore exist for large patterns</li>
+    </ul>`,
+    requireSorted: false
+}
+};
+
+
+randomArrayBtn.addEventListener('click', generateRandomArray);
+sortArrayBtn.addEventListener('click', sortArray);
+startBtn.addEventListener('click', startSearch);
+algorithmSelect.addEventListener('change', updateAlgorithmInfo);
+animationSpeedInput.addEventListener('input', updateAnimationSpeed);
+prevStepBtn.addEventListener('click', showPrevStep);
+nextStepBtn.addEventListener('click', showNextStep);
+userArrayInput.addEventListener('input', () => {
+    try {
+        parseUserArray();
+        hideError();
+        renderArray();
+    } catch (e) {
+
+    }
+});
+userArrayInput.addEventListener('blur', () => {
+    try {
+        parseUserArray();
+        hideError();
+        renderArray();
+    } catch (e) {
+        showError(e.message);
+    }
+});
+
+
+generateRandomArray();
+updateAlgorithmInfo();
+
+
+function parseUserArray() {
+    const input = userArrayInput.value.trim();
+    
+
+    if (!input) {
+        throw new Error('Please enter at least one number.');
+    }
+
+
+    const parsedArray = input.split(',').map(item => {
+
+        const num = Number(item.trim());
+        
+
+        if (isNaN(num)) {
+            throw new Error(`Invalid number: "${item.trim()}"`);
+        }
+
+
+        if (num < 1 || num > 1000) {
+            throw new Error(`Number "${num}" is out of the allowed range (1 to 1000).`);
+        }
+
+        return num;
+    });
+
+    // empty array
+    if (parsedArray.length === 0) {
+        throw new Error('Please enter at least one number.');
+    }
+
+    //max 20
+    const maxNumbers = 20;
+    if (parsedArray.length > maxNumbers) {
+        throw new Error(`You can only enter a maximum of ${maxNumbers} numbers.`);
+    }
+
+    // Return the parsed array
+    array = parsedArray;
+    return array;
+}
+
+function showError(message) {
+    arrayError.textContent = message;
+    arrayError.style.display = 'block';
+}
+
+function hideError() {
+    arrayError.style.display = 'none';
+}
+
+function generateRandomArray() {
+    resetSearch();
+    
+
+    const size = Math.floor(Math.random() * 6) + 10;
+    array = [];
+    
+    for (let i = 0; i < size; i++) {
+        array.push(Math.floor(Math.random() * 90) + 10);
+    }
+    
+
+    userArrayInput.value = array.join(', ');
+    
+    renderArray();
+    hideError();
+    addLog(`Generated ${size} random elements`);
+
+
+    checkSortRequirement();
+}
+
+function sortArray() {
+    resetSearch();
+    
+    try {
+        array = parseUserArray();
+        array.sort((a, b) => a - b);
+        
+
+        userArrayInput.value = array.join(', ');
+        
+        renderArray();
+        hideError();
+        addLog('Array sorted in ascending order');
+        
+
+        algorithmWarning.style.display = 'none';
+    } catch (e) {
+        showError(e.message);
+    }
+}
+
+function renderArray(highlight = {}) {
+    arrayContainer.innerHTML = '';
+    
+    array.forEach((value, index) => {
+        const bar = document.createElement('div');
+        bar.classList.add('array-bar');
+        bar.style.height = `${Math.min(value * 1.5, 150)}px`;
+        bar.textContent = value;
+        
+
+        if (highlight.current && highlight.current.includes(index)) {
+            bar.classList.add('current');
+        }
+        if (highlight.found && highlight.found.includes(index)) {
+            bar.classList.add('found');
+        }
+        if (highlight.notFound && highlight.notFound.includes(index)) {
+            bar.classList.add('not-found');
+        }
+        
+        arrayContainer.appendChild(bar);
+    });
+}
+
+function startSearch() {
+    if (isSearchRunning) {
+        stopSearch();
+        return;
+    }
+    
+    try {
+
+        array = parseUserArray();
+        hideError();
+        
+        resetSearch();
+        
+        const target = parseInt(searchValueInput.value);
+        if (isNaN(target)) {
+            throw new Error('Please enter a valid number to search');
+        }
+        
+        const algorithm = algorithmSelect.value;
+        
+
+        if (algorithmInfoData[algorithm].requireSorted) {
+            const isSorted = array.every((val, i, arr) => !i || arr[i-1] <= val);
+            if (!isSorted) {
+                addLog('WARNING: This algorithm requires a sorted array for correct results. You may get unexpected behavior.');
+            }
+        }
+        
+        calculateSearchSteps(algorithm, target);
+        
+        if (searchSteps.length === 0) {
+            addLog('No steps to visualize. Try a different target or algorithm.');
+            return;
+        }
+        
+        isSearchRunning = true;
+        startBtn.textContent = 'Stop Search';
+        prevStepBtn.disabled = true;
+        nextStepBtn.disabled = false;
+        
+
+        showNextStep();
+        
+
+        animationInterval = setInterval(() => {
+            if (currentStepIndex >= searchSteps.length - 1) {
+                stopSearch();
+            } else {
+                showNextStep();
+            }
+        }, animationSpeed);
+    } catch (e) {
+        showError(e.message);
+    }
+}
+
+function stopSearch() {
+    clearInterval(animationInterval);
+    isSearchRunning = false;
+    startBtn.textContent = 'Start Search';
+    
+    prevStepBtn.disabled = currentStepIndex <= 0;
+    nextStepBtn.disabled = currentStepIndex >= searchSteps.length - 1;
+}
+
+function resetSearch() {
+    stopSearch();
+    searchSteps = [];
+    currentStepIndex = -1;
+    logsContainer.innerHTML = '';
+    renderArray();
+    prevStepBtn.disabled = true;
+    nextStepBtn.disabled = true;
+}
+
+function calculateSearchSteps(algorithm, target) {
+    searchSteps = [];
+    
+    switch (algorithm) {
+        case 'linear':
+            linearSearchSteps(array, target);
+            break;
+        case 'binary':
+            binarySearchSteps(array, target);
+            break;
+        case 'jump':
+            jumpSearchSteps(array, target);
+            break;
+        case 'interpolation':
+            interpolationSearchSteps(array, target);
+            break;
+        case 'fibonacci':
+            fibonacciSearchSteps(array, target);
+            break;
+        case 'exponential':
+            exponentialSearchSteps(array, target);
+            break;
+            case 'ternary':
+            ternarySearchSteps(array, target);
+            break;
+        case 'sentinelLinear':
+            sentinelLinearSearchSteps(array, target);
+            break;
+        case 'metaBinary':
+            metaBinarySearchSteps(array, target);
+            break;
+        case 'galloping':
+            gallopingSearchSteps(array, target);
+            break;
+        case 'sublist':
+            const pattern = [target]; 
+            sublistSearchSteps(array, pattern);
+            break;
+    }
+}
+
+function linearSearchSteps(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        const step = {
+            highlight: { current: [i] },
+            log: `Checking element at index ${i}: ${arr[i]}`
+        };
+        
+        if (arr[i] === target) {
+            step.highlight.found = [i];
+            step.log = `Found target ${target} at index ${i}!`;
+            searchSteps.push(step);
+            return;
+        }
+        
+        searchSteps.push(step);
+    }
+    
+
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: arr.length }, (_, i) => i) },
+        log: `Target ${target} not found in the array.`
+    });
+}
+
+function binarySearchSteps(arr, target) {
+    let left = 0;
+    let right = arr.length - 1;
+    
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+
+        searchSteps.push({
+            highlight: { current: [mid] },
+            log: `Looking at element at index ${mid}: ${arr[mid]}\nSearch range: [${left}...${right}]`
+        });
+        
+        if (arr[mid] === target) {
+            searchSteps.push({
+                highlight: { found: [mid] },
+                log: `Found target ${target} at index ${mid}!`
+            });
+            return;
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+            const newRange = Array.from(
+                { length: Math.max(0, right - left + 1) }, 
+                (_, i) => i + left
+            );
+            if (newRange.length > 0) {
+                searchSteps.push({
+                    highlight: { current: newRange },
+                    log: `${arr[mid]} < ${target}, so search in the right half. New range: [${left}...${right}]`
+                });
+            }
+        } else {
+            right = mid - 1;
+            const newRange = Array.from(
+                { length: Math.max(0, right - left + 1) }, 
+                (_, i) => i + left
+            );
+            if (newRange.length > 0) {
+                searchSteps.push({
+                    highlight: { current: newRange },
+                    log: `${arr[mid]} > ${target}, so search in the left half. New range: [${left}...${right}]`
+                });
+            }
+        }
+    }
+    
+    // Target not found
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: arr.length }, (_, i) => i) },
+        log: `Target ${target} not found in the array.`
+    });
+}
+
+function jumpSearchSteps(arr, target) {
+    const n = arr.length;
+    const step = Math.floor(Math.sqrt(n));
+    
+    let prev = 0;
+    let current = Math.min(step, n) - 1;
+    
+    searchSteps.push({
+        highlight: { current: [current] },
+        log: `Jump search uses block size of √n = ${step}. Checking element at index ${current}: ${arr[current]}`
+    });
+    
+    // Finding the block
+    while (arr[current] < target) {
+        prev = current + 1;
+        current = Math.min(current + step, n - 1);
+        
+        if (prev >= n) {
+            searchSteps.push({
+                highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+                log: `Reached the end of the array. Target ${target} not found.`
+            });
+            return;
+        }
+        
+        searchSteps.push({
+            highlight: { current: [current] },
+            log: `Jumping to index ${current}: ${arr[current]}`
+        });
+    }
+    
+    // Add step to indicate linear search in the block
+    const blockRange = Array.from(
+        { length: current - prev + 1 }, 
+        (_, i) => i + prev
+    );
+    searchSteps.push({
+        highlight: { current: blockRange },
+        log: `Found potential block. Performing linear search from index ${prev} to ${current}.`
+    });
+    
+    // Linear search in the block
+    for (let i = prev; i <= current; i++) {
+        searchSteps.push({
+            highlight: { current: [i] },
+            log: `Checking element at index ${i}: ${arr[i]}`
+        });
+        
+        if (arr[i] === target) {
+            searchSteps.push({
+                highlight: { found: [i] },
+                log: `Found target ${target} at index ${i}!`
+            });
+            return;
+        }
+        
+        if (arr[i] > target) {
+            searchSteps.push({
+                highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+                log: `Element at index ${i} is greater than target ${target}. Target not in array.`
+            });
+            return;
+        }
+    }
+    
+    // Target not found
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+        log: `Target ${target} not found in the array.`
+    });
+}
+
+function interpolationSearchSteps(arr, target) {
+    let low = 0;
+    let high = arr.length - 1;
+    
+    searchSteps.push({
+        highlight: { current: [] },
+        log: `Starting interpolation search for ${target} in range [${low}...${high}]`
+    });
+    
+    while (low <= high && target >= arr[low] && target <= arr[high]) {
+        // Prevent division by zero
+        if (arr[high] === arr[low]) {
+            const index = low;
+            if (arr[index] === target) {
+                searchSteps.push({
+                    highlight: { found: [index] },
+                    log: `Found target ${target} at index ${index}!`
+                });
+            } else {
+                searchSteps.push({
+                    highlight: { notFound: [index] },
+                    log: `Element at index ${index} is ${arr[index]}, not equal to target ${target}.`
+                });
+            }
+            break;
+        }
+        
+        // Probe position formula
+        const pos = low + Math.floor(
+            ((target - arr[low]) * (high - low)) / 
+            (arr[high] - arr[low])
+        );
+        
+        searchSteps.push({
+            highlight: { current: [pos] },
+            log: `Calculated position using interpolation formula: index ${pos} (value: ${arr[pos]})`
+        });
+        
+        if (arr[pos] === target) {
+            searchSteps.push({
+                highlight: { found: [pos] },
+                log: `Found target ${target} at index ${pos}!`
+            });
+            return;
+        }
+        
+        if (arr[pos] < target) {
+            low = pos + 1;
+            searchSteps.push({
+                highlight: { current: Array.from({ length: high - low + 1 }, (_, i) => i + low) },
+                log: `${arr[pos]} < ${target}, searching in range [${low}...${high}]`
+            });
+        } else {
+            high = pos - 1;
+            searchSteps.push({
+                highlight: { current: Array.from({ length: high - low + 1 }, (_, i) => i + low) },
+                log: `${arr[pos]} > ${target}, searching in range [${low}...${high}]`
+            });
+        }
+    }
+    
+    if (low > high || target < arr[low] || target > arr[high]) {
+        searchSteps.push({
+            highlight: { notFound: Array.from({ length: arr.length }, (_, i) => i) },
+            log: `Target ${target} not found in the array.`
+        });
+    }
+}
+
+function fibonacciSearchSteps(arr, target) {
+    const n = arr.length;
+    
+    // Find the smallest Fibonacci number greater than or equal to n
+    let fibM2 = 0;   // (m-2)'th Fibonacci number
+    let fibM1 = 1;   // (m-1)'th Fibonacci number
+    let fibM = fibM1 + fibM2;  // m'th Fibonacci number
+    
+    while (fibM < n) {
+        fibM2 = fibM1;
+        fibM1 = fibM;
+        fibM = fibM1 + fibM2;
+    }
+    
+    searchSteps.push({
+        highlight: { current: [] },
+        log: `Fibonacci search uses Fibonacci numbers: ${fibM2}, ${fibM1}, ${fibM}`
+    });
+    
+    let offset = -1;
+    
+    // While there are elements to be inspected
+    while (fibM > 1) {
+        // Check if fibM2 is a valid index
+        let i = Math.min(offset + fibM2, n - 1);
+        
+        searchSteps.push({
+            highlight: { current: [i] },
+            log: `Checking element at index ${i}: ${arr[i]}`
+        });
+        
+        // If target is greater than the element at index i,
+        // cut the subarray from offset to i
+        if (arr[i] < target) {
+            fibM = fibM1;
+            fibM1 = fibM2;
+            fibM2 = fibM - fibM1;
+            offset = i;
+            
+            const newRange = Array.from(
+                { length: Math.min(n - 1, offset + fibM2) - offset }, 
+                (_, idx) => idx + offset + 1
+            );
+            if (newRange.length > 0) {
+                searchSteps.push({
+                    highlight: { current: newRange },
+                    log: `${arr[i]} < ${target}, moving right. New Fibonacci numbers: ${fibM2}, ${fibM1}, ${fibM}`
+                });
+            }
+        }
+        // If target is less than the element at index i,
+        // cut the subarray after i+1
+        else if (arr[i] > target) {
+            fibM = fibM2;
+            fibM1 = fibM1 - fibM2;
+            fibM2 = fibM - fibM1;
+            
+            const newRange = Array.from(
+                { length: i - offset - 1 }, 
+                (_, idx) => idx + offset + 1
+            );
+            if (newRange.length > 0) {
+                searchSteps.push({
+                    highlight: { current: newRange },
+                    log: `${arr[i]} > ${target}, moving left. New Fibonacci numbers: ${fibM2}, ${fibM1}, ${fibM}`
+                });
+            }
+        }
+        // Element found
+        else {
+            searchSteps.push({
+                highlight: { found: [i] },
+                log: `Found target ${target} at index ${i}!`
+            });
+            return;
+        }
+    }
+    
+    // Compare the last element
+    if (fibM1 && arr[offset + 1] === target) {
+        searchSteps.push({
+            highlight: { found: [offset + 1] },
+            log: `Found target ${target} at index ${offset + 1}!`
+        });
+        return;
+    }
+    
+    // Target not found
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+        log: `Target ${target} not found in the array.`
+    });
+}
+
+function exponentialSearchSteps(arr, target) {
+    const n = arr.length;
+    
+    // If target is the first element
+    if (arr[0] === target) {
+        searchSteps.push({
+            highlight: { current: [0], found: [0] },
+            log: `First element ${arr[0]} matches target ${target}. Found at index 0!`
+        });
+        return;
+    }
+    
+    searchSteps.push({
+        highlight: { current: [0] },
+        log: `Starting exponential search for ${target}`
+    });
+    
+    // Find range for binary search (power of 2 jumps)
+    let i = 1;
+    while (i < n && arr[i] <= target) {
+        searchSteps.push({
+            highlight: { current: [i] },
+            log: `Checking index ${i}: ${arr[i]} <= ${target}, doubling i`
+        });
+        i *= 2;
+    }
+    
+    const left = Math.floor(i / 2);
+    const right = Math.min(i, n - 1);
+    
+    searchSteps.push({
+        highlight: { current: Array.from({ length: right - left + 1 }, (_, idx) => idx + left) },
+        log: `Found range for binary search: [${left}...${right}]`
+    });
+    
+    // Perform binary search in the range
+    binarySearchInRangeSteps(arr, target, left, right);
+}
+
+function binarySearchInRangeSteps(arr, target, left, right) {
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        searchSteps.push({
+            highlight: { current: [mid] },
+            log: `Binary search in range [${left}...${right}]. Checking mid at index ${mid}: ${arr[mid]}`
+        });
+        
+        if (arr[mid] === target) {
+            searchSteps.push({
+                highlight: { found: [mid] },
+                log: `Found target ${target} at index ${mid}!`
+            });
+            return;
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+            if (left <= right) {
+                searchSteps.push({
+                    highlight: { current: Array.from({ length: right - left + 1 }, (_, i) => i + left) },
+                    log: `${arr[mid]} < ${target}, searching right half [${left}...${right}]`
+                });
+            }
+        } else {
+            right = mid - 1;
+            if (left <= right) {
+                searchSteps.push({
+                    highlight: { current: Array.from({ length: right - left + 1 }, (_, i) => i + left) },
+                    log: `${arr[mid]} > ${target}, searching left half [${left}...${right}]`
+                });
+            }
+        }
+    }
+    
+    // Target not found
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: arr.length }, (_, i) => i) },
+        log: `Target ${target} not found in the range [${left}...${right}].`
+    });
+}
+//ternary search
+function ternarySearchSteps(arr, target) {
+    let left = 0;
+    let right = arr.length - 1;
+    
+    while (left <= right) {
+        let mid1 = left + Math.floor((right - left) / 3);
+        let mid2 = right - Math.floor((right - left) / 3);
+        
+        // Add step for the current range
+        searchSteps.push({
+            highlight: { current: [mid1, mid2] },
+            log: `Checking elements at indices ${mid1} (${arr[mid1]}) and ${mid2} (${arr[mid2]})\nSearch range: [${left}...${right}]`
+        });
+        
+        if (arr[mid1] === target) {
+            searchSteps.push({
+                highlight: { found: [mid1] },
+                log: `Found target ${target} at index ${mid1}!`
+            });
+            return;
+        }
+        
+        if (arr[mid2] === target) {
+            searchSteps.push({
+                highlight: { found: [mid2] },
+                log: `Found target ${target} at index ${mid2}!`
+            });
+            return;
+        }
+        
+        if (target < arr[mid1]) {
+            right = mid1 - 1;
+            const newRange = Array.from({ length: right - left + 1 }, (_, i) => i + left);
+            searchSteps.push({
+                highlight: { current: newRange },
+                log: `${target} < ${arr[mid1]}, so search in the left third [${left}...${right}]`
+            });
+        } else if (target > arr[mid2]) {
+            left = mid2 + 1;
+            const newRange = Array.from({ length: right - left + 1 }, (_, i) => i + left);
+            searchSteps.push({
+                highlight: { current: newRange },
+                log: `${target} > ${arr[mid2]}, so search in the right third [${left}...${right}]`
+            });
+        } else {
+            left = mid1 + 1;
+            right = mid2 - 1;
+            const newRange = Array.from({ length: right - left + 1 }, (_, i) => i + left);
+            searchSteps.push({
+                highlight: { current: newRange },
+                log: `${arr[mid1]} < ${target} < ${arr[mid2]}, so search in the middle third [${left}...${right}]`
+            });
+        }
+    }
+    
+    // Target not found
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: arr.length }, (_, i) => i) },
+        log: `Target ${target} not found in the array.`
+    });
+}
+//meta binary search
+function metaBinarySearchSteps(arr, target) {
+    const n = arr.length;
+    
+    // Find the number of bits required to represent n
+    const bits = Math.floor(Math.log2(n)) + 1;
+    
+    searchSteps.push({
+        highlight: { current: [] },
+        log: `Meta Binary Search: Using ${bits} bits to search array of size ${n}`
+    });
+    
+    let pos = 0;
+    
+    for (let i = bits - 1; i >= 0; i--) {
+        const testPos = pos | (1 << i);
+        
+        if (testPos < n) {
+            searchSteps.push({
+                highlight: { current: [testPos] },
+                log: `Testing bit ${i} at position ${testPos}: ${arr[testPos]}`
+            });
+            
+            if (arr[testPos] <= target) {
+                pos = testPos;
+                searchSteps.push({
+                    highlight: { current: [pos] },
+                    log: `${arr[testPos]} <= ${target}, setting position to ${pos}`
+                });
+            } else {
+                searchSteps.push({
+                    highlight: { current: [] },
+                    log: `${arr[testPos]} > ${target}, keeping position at ${pos}`
+                });
+            }
+        }
+    }
+    
+    if (arr[pos] === target) {
+        searchSteps.push({
+            highlight: { found: [pos] },
+            log: `Found target ${target} at index ${pos}!`
+        });
+    } else {
+        searchSteps.push({
+            highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+            log: `Target ${target} not found in the array.`
+        });
+    }
+}
+//Galloping/Doubling Search
+function gallopingSearchSteps(arr, target) {
+    const n = arr.length;
+    
+    if (arr[0] === target) {
+        searchSteps.push({
+            highlight: { found: [0] },
+            log: `Target ${target} found at index 0!`
+        });
+        return;
+    }
+    
+    // Find range for binary search
+    let k = 1;
+    while (k < n && arr[k] < target) {
+        searchSteps.push({
+            highlight: { current: [k] },
+            log: `Checking index ${k}: ${arr[k]} < ${target}, doubling k`
+        });
+        k *= 2;
+    }
+    
+    // Perform binary search
+    const left = Math.floor(k/2);
+    const right = Math.min(k, n-1);
+    
+    searchSteps.push({
+        highlight: { current: Array.from({ length: right - left + 1 }, (_, i) => i + left) },
+        log: `Found range for binary search: [${left}...${right}]`
+    });
+    
+    binarySearchInRangeSteps(arr, target, left, right);
+}
+//Sublist Search (Pattern Search in Array)
+function sublistSearchSteps(arr, pattern) {
+    const n = arr.length;
+    const m = pattern.length;
+    
+    if (m > n) {
+        searchSteps.push({
+            highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+            log: `Pattern length (${m}) is greater than array length (${n}). Pattern cannot exist in array.`
+        });
+        return;
+    }
+    
+    searchSteps.push({
+        highlight: { current: [] },
+        log: `Searching for pattern [${pattern.join(', ')}] in the array`
+    });
+    
+    for (let i = 0; i <= n - m; i++) {
+        let j;
+        
+        // Check if current window matches pattern
+        for (j = 0; j < m; j++) {
+            searchSteps.push({
+                highlight: { current: [i + j] },
+                log: `Comparing arr[${i + j}] = ${arr[i + j]} with pattern[${j}] = ${pattern[j]}`
+            });
+            
+            if (arr[i + j] !== pattern[j]) {
+                searchSteps.push({
+                    highlight: { current: [] },
+                    log: `Mismatch at index ${i + j}. Moving to next position.`
+                });
+                break;
+            }
+        }
+        
+        if (j === m) {
+            const matchIndices = Array.from({ length: m }, (_, idx) => i + idx);
+            searchSteps.push({
+                highlight: { found: matchIndices },
+                log: `Pattern found at index ${i}!`
+            });
+            return;
+        }
+    }
+    
+    searchSteps.push({
+        highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+        log: `Pattern not found in the array.`
+    });
+}
+//Sentinel Linear Search
+function sentinelLinearSearchSteps(arr, target) {
+    const n = arr.length;
+    
+    // Store the last element and replace it with the target
+    searchSteps.push({
+        highlight: { current: [n-1] },
+        log: `Sentinel search: Storing last element (${arr[n-1]}) and temporarily replacing it with target ${target}`
+    });
+    
+    const lastElement = arr[n-1];
+    arr[n-1] = target;  // This is the sentinel
+    
+    let i = 0;
+    while (arr[i] !== target) {
+        searchSteps.push({
+            highlight: { current: [i] },
+            log: `Checking element at index ${i}: ${arr[i]}`
+        });
+        i++;
+    }
+    
+    // Restore the last element
+    arr[n-1] = lastElement;
+    
+    if (i < n-1 || lastElement === target) {
+        searchSteps.push({
+            highlight: { found: [i] },
+            log: `Found target ${target} at index ${i}!`
+        });
+    } else {
+        searchSteps.push({
+            highlight: { notFound: Array.from({ length: n }, (_, i) => i) },
+            log: `Target ${target} not found in the array.`
+        });
+    }
+}
+
+function showNextStep() {
+    if (currentStepIndex < searchSteps.length - 1) {
+        currentStepIndex++;
+        const step = searchSteps[currentStepIndex];
+        
+        renderArray(step.highlight);
+        addLog(step.log);
+        
+        prevStepBtn.disabled = false;
+        nextStepBtn.disabled = currentStepIndex >= searchSteps.length - 1;
+    }
+}
+
+function showPrevStep() {
+    if (currentStepIndex > 0) {
+        currentStepIndex--;
+        const step = searchSteps[currentStepIndex];
+        
+        renderArray(step.highlight);
+        addLog(`(Back to step ${currentStepIndex + 1}) ${step.log}`);
+        
+        prevStepBtn.disabled = currentStepIndex <= 0;
+        nextStepBtn.disabled = false;
+    } else if (currentStepIndex === 0) {
+
+        currentStepIndex = -1;
+        renderArray();
+        addLog('Initial state');
+        
+        prevStepBtn.disabled = true;
+        nextStepBtn.disabled = false;
+    }
+}
+
+function addLog(message) {
+    const logEntry = document.createElement('div');
+    logEntry.classList.add('log-entry');
+    
+
+    logEntry.innerHTML = message.replace(/\n/g, '<br>');
+    
+    logsContainer.appendChild(logEntry);
+    
+    // Scroll to the bottom
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+}
+
+    
+function updateAlgorithmInfo() {
+            const algorithm = algorithmSelect.value;
+            const info = algorithmInfoData[algorithm];
+            
+
+            const titleElement = algorithmInfo.querySelector('h3');
+            const descElement = algorithmInfo.querySelector('p');
+            
+            titleElement.textContent = info.name;
+            descElement.textContent = info.description;
+            algorithmCode.textContent = info.code;
+            document.getElementById('algorithm-explanation').innerHTML = info.explanation;
+        }
+
+
+
+function checkSortRequirement() {
+    const algorithm = algorithmSelect.value;
+    const requiresSorted = algorithmInfoData[algorithm].requireSorted;
+    
+    if (requiresSorted) {
+        // Check if the current array is sorted
+        const isSorted = array.every((val, i, arr) => !i || arr[i-1] <= val);
+        
+        if (!isSorted) {
+            algorithmWarning.style.display = 'block';
+            algorithmWarning.textContent = `Warning: ${algorithmInfoData[algorithm].name} works correctly only on sorted arrays. Please sort your array first.`;
+        } else {
+            algorithmWarning.style.display = 'none';
+        }
+    } else {
+        algorithmWarning.style.display = 'none';
+    }
+}
+
+function updateAnimationSpeed() {
+
+    const speedValue = parseInt(animationSpeedInput.value);
+    
+
+    animationSpeed = 2000 - (speedValue / 100) * 500 + 100;
+    
+
+    if (isSearchRunning) {
+        clearInterval(animationInterval);
+        animationInterval = setInterval(() => {
+            if (currentStepIndex >= searchSteps.length - 1) {
+                stopSearch();
+            } else {
+                showNextStep();
+            }
+        }, animationSpeed);
+    }
+}
+       </script>
+</body>
+</html>
