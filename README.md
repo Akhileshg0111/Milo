@@ -17,7 +17,7 @@ wanna experience Milo : https://milo-ai-1.web.app
 - Smart Q&A System - Ask complex educational questions and receive curriculum-aligned answers
 - Multi-Language Translation - Real-time translation in 15+ languages for diverse classrooms
 - Advanced Image Analysis - Upload and analyze student work, diagrams, and educational materials
-- Worksheet Generation** - Create customized worksheets, quizzes, and assignments automatically
+- Worksheet Generation - Create customized worksheets, quizzes, and assignments automatically
 - Speech-to-Text - Convert voice to text for note-taking and accessibility support
 - Text-to-Speech - Transform written content into natural-sounding speech
 - Charts & Graphs Generation - Create visual data representations for enhanced learning
