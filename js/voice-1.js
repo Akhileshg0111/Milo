@@ -7,7 +7,7 @@ const VoiceInputWithGemini = {
     languageDropdown: null,
     selectedLanguage: 'en',
     
-    GEMINI_API_KEY: 'AIzaSyDF62UE1x9NC0__oAwIVJDbRBmK8WcW_IA',
+    GEMINI_API_KEY: '',//add ur api key here
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent',
     
     targetLanguages: {
