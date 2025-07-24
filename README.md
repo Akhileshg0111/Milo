@@ -25,6 +25,7 @@ wanna experience Milo : https://milo-ai-1.web.app
 
 ### 🛠️ Advanced Tools
 - NLP Sql cmd - For faster sql learning with ai
+- Reminder - Add Reminders to never miss classes or exams
 - Attendance Management - Manage student attendace and export them when needed
 - Video Sharing Blog - Upload and explore teaching videos from fellow educators
 - AI Image Generation - Create stunning educational visuals and diagrams
