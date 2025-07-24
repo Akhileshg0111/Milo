@@ -67,7 +67,7 @@ stroke-linecap="round" stroke-linejoin="round">
             this.notificationPermission = false;
             this.checkIntervals = [];
             this.audioContext = null;
-            this.customSound = new Audio('js/notify.mp3');
+            this.customSound = new Audio('notify.mp3');
             this.init();
         }
 
