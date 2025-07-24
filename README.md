@@ -82,6 +82,7 @@ Supporting 15+ languages including:
 milo-ai/
  public
     ├── 404.html
+    ├── notify.mp3
     ├── attendance.html
     ├── index.html
     ├── js
