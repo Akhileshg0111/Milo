@@ -11,6 +11,7 @@ Our Motive is to serve you the features which maximise your workflow..
 
 - wanna experience Milo : https://milo-ai-1.web.app
 - For Images : https://milo-ai-1.web.app/info.html
+- For Project PPT : https://milo-ai-1.web.app/milo-img/Milo.pdf
 
 ## ✨ Key Features
 
