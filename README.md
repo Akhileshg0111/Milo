@@ -9,8 +9,8 @@ Milo AI is a revolutionary AI-powered teaching assistant platform designed to tr
 
 Our Motive is to serve you the features which maximise your workflow..
 
-wanna experience Milo : https://milo-ai-1.web.app
-For Images : https://milo-ai-1.web.app/info.html
+- wanna experience Milo : https://milo-ai-1.web.app
+- For Images : https://milo-ai-1.web.app/info.html
 
 ## ✨ Key Features
 
