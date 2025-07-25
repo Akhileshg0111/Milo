@@ -48,6 +48,7 @@ Supporting 15+ languages including:
 ### Prerequisites
 - npm 
 - Firebase account
+- API's (Google Cloud Console for Gemini Api,cloud vision Api,Text to speech Api,Hugging Face Stable diffusion Api)
 - Modern web browser
 
 ### Installation
