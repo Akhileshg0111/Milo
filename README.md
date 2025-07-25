@@ -35,6 +35,7 @@ Our Motive is to serve you the features which maximise your workflow..
 - Screen Sharing Hub - High-definition screen sharing with synchronized audio
 - Code Compiler - Online compiler supporting 25+ programming languages
 - Educational Game Creator - Design custom educational games and interactive activities
+- Video Conferencing - Tool to communicate to student or Tecacher to learn
 
 ### 🌍 Language Support
 Supporting 15+ languages including:
